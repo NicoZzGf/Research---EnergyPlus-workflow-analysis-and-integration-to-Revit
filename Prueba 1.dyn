@@ -1,0 +1,641 @@
+{
+  "Uuid": "35aaec71-b718-4095-a777-5fc34c3d2228",
+  "IsCustomNode": false,
+  "Description": "",
+  "Name": "Prueba 1",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [
+    {
+      "Id": "7dba4bee9b104a828bc07a5d325f9a0f",
+      "Name": "Python Script",
+      "Type": "unknown",
+      "InitialValue": "",
+      "Description": "Runs an embedded Python script."
+    }
+  ],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "4c6df543f00d4deaafdcc28aaf3da96c",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "d60ff5e9b1a1411aa3d55fdd1abcae70",
+          "Name": "file",
+          "Description": "File representing the Excel workbook\n\nvar",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2ae4f0f15e5745ada108f5ad7f3c89d0",
+          "Name": "sheetName",
+          "Description": "Name of the worksheet containing data\n\nstring",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "0f85e4a015174ad7b7fcc75ed9b1ec89",
+          "Name": "readAsStrings",
+          "Description": "Toggle to read cells as strings\n\nbool\nDefault value : false",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "7dcd2beea91d469893afb2ed79493630",
+          "Name": "showExcel",
+          "Description": "Toggle to show excel's main window\n\nbool\nDefault value : true",
+          "UsingDefaultValue": true,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "f3664e7573d0463294c56173ef2762c8",
+          "Name": "data",
+          "Description": "Rows of data from the Excel worksheet",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "DSOffice.Data.ImportExcel@var,string,bool,bool",
+      "Replication": "Auto",
+      "Description": "Read data from a Microsoft Excel spreadsheet. Data is read by row and returned in a series of lists by row. Rows and columns are zero-indexed; for example, the value in cell A1 will appear in the data list at [0,0]. This node requires Microsoft Excel to be installed.\n\nData.ImportExcel (file: var, sheetName: string, readAsStrings: bool = false, showExcel: bool = true): var[][]"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "3c251b49eeb14152ba07cdfbd4bc006b",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e3fdd94b674342b4b254c2f12b02d2a0",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\user\\Documents\\Prueba.xlsx",
+      "InputValue": "C:\\Users\\user\\Documents\\Prueba.xlsx"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "2c22a0cbd8f74371b3624d9f3321ab89",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "8ebf7b2a27fd404ba8a770fbd2d6b793",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "1"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.FileObject, CoreNodeModels",
+      "Id": "094f747762c94af3ba0c7dbfe3ffc919",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "b11c8866eac747868b911a79e1e5616a",
+          "Name": "path",
+          "Description": "Path to the file.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "5be44fd2df9f458b8f4666fb4622d1b6",
+          "Name": "file",
+          "Description": "File object",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a file object from the given path"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import clr\r\nimport re\r\n\r\nclr.AddReference('RevitAPI')\r\nfrom Autodesk.Revit.DB import *\r\n\r\nclr.AddReference('RevitServices')\r\nimport RevitServices\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom RevitServices.Transactions import TransactionManager\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\n\r\n# --- ENTRADAS DE DYNAMO ---\r\ndata_rows = IN[0]          \r\nbase_wall_type = UnwrapElement(IN[1]) \r\nparam_name = \"EnergyPlus_Zone\" \r\n\r\ndef cm_to_feet(cm):\r\n    return cm / 30.48\r\n\r\ndef get_material_id(name):\r\n    collector = FilteredElementCollector(doc).OfClass(Material)\r\n    for m in collector:\r\n        if m.Name.lower().strip() == name.lower().strip():\r\n            return m.Id\r\n    return None\r\n\r\n# 1. ORGANIZACIÓN DE DATOS\r\nstrategy_map = {} # Todas las composiciones para crear el catálogo\r\ntop1_map = {}     # Relación Zona -> Estrategia Ganadora (Ranking 1)\r\n\r\nfor row in data_rows[1:]:\r\n    if len(row) >= 9:\r\n        # Limpieza profunda de los nombres del Excel\r\n        zone_name = str(row[0]).strip().lower()\r\n        # Convertimos ranking a string y quitamos decimales si los hay (ej: \"1.0\" -> \"1\")\r\n        ranking = str(row[1]).split('.')[0].strip() \r\n        s_id = str(row[2]).strip()\r\n        comp = str(row[8]).strip()\r\n        \r\n        # Guardar para creación de tipos\r\n        if s_id not in strategy_map:\r\n            strategy_map[s_id] = comp\r\n            \r\n        # Asignar como ganador si el ranking es 1\r\n        if ranking == \"1\":\r\n            top1_map[zone_name] = s_id\r\n\r\n# --- INICIAR TRANSACCIÓN ---\r\nTransactionManager.Instance.EnsureInTransaction(doc)\r\n\r\ncreated_types = {}\r\nall_wall_types = FilteredElementCollector(doc).OfClass(WallType).ToElements()\r\n\r\n# 2. CREAR O BUSCAR TIPOS DE MURO\r\nfor s_id, comp in strategy_map.items():\r\n    # Buscar si ya existe por nombre exacto\r\n    existing = next((wt for wt in all_wall_types if wt.get_Parameter(BuiltInParameter.SYMBOL_NAME_PARAM).AsString() == s_id), None)\r\n    \r\n    if existing is None:\r\n        try:\r\n            new_type = base_wall_type.Duplicate(s_id)\r\n            layers = []\r\n            for p in comp.split('|'):\r\n                parts = p.strip().split('_')\r\n                mat_name = \"_\".join(parts[:-1])\r\n                # Extraer grosor eliminando 'cm' y convirtiendo a float\r\n                thick_val = float(re.findall(r\"[-+]?\\d*\\.\\d+|\\d+\", parts[-1])[0])\r\n                m_id = get_material_id(mat_name)\r\n                if m_id:\r\n                    layers.append(CompoundStructureLayer(cm_to_feet(thick_val), MaterialFunctionAssignment.Finish1, m_id))\r\n            \r\n            if layers:\r\n                cs = new_type.GetCompoundStructure()\r\n                cs.SetLayers(layers)\r\n                new_type.SetCompoundStructure(cs)\r\n            created_types[s_id] = new_type\r\n        except: continue\r\n    else:\r\n        created_types[s_id] = existing\r\n\r\n# 3. REEMPLAZO EN EL MODELO (ASIGNACIÓN)\r\nall_walls = FilteredElementCollector(doc).OfClass(Wall).ToElements()\r\napplied_count = 0\r\ndebug_list = []\r\n\r\nfor wall in all_walls:\r\n    p = wall.LookupParameter(param_name)\r\n    if p and p.HasValue:\r\n        wall_zone = p.AsString().strip().lower()\r\n        debug_list.append(wall_zone) # Para ver qué está leyendo Revit\r\n        \r\n        if wall_zone in top1_map:\r\n            target_id = top1_map[wall_zone]\r\n            if target_id in created_types:\r\n                # CAMBIAR EL TIPO FÍSICO\r\n                wall.WallType = created_types[target_id]\r\n                applied_count += 1\r\n\r\nTransactionManager.Instance.TransactionTaskDone()\r\n\r\n# MENSAJE DE SALIDA\r\nif applied_count > 0:\r\n    OUT = \"ÉXITO: Se han actualizado {} muros al Top 1.\".format(applied_count)\r\nelse:\r\n    OUT = \"ERROR: No se actualizaron muros. Revisa si los nombres en Revit coinciden con: \" + str(top1_map.keys())",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "7dba4bee9b104a828bc07a5d325f9a0f",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "2a401ce455404c58966a9f1a33c9cb97",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ad40798bf7a146f18f8d90df811a1695",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "3431e1fc689840bc80289a8690f8d19d",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.WallTypes, DSRevitNodesUI",
+      "SelectedIndex": 43,
+      "SelectedString": "Muro Prueba Dynamo",
+      "Id": "79510df5236e4ae590c1077c78710a37",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7e71d30b4cc84d0caa43db1eabd94f98",
+          "Name": "Wall Type",
+          "Description": "The selected Wall Type",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All wall types available in the document."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "907cbe548c3141b48a5b223d486db081",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "b2626ab9584940d599b50ab4531c3a98",
+          "Name": "element",
+          "Description": "Revit.Elements.Element",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "57ce2034db674cb884f6caed215f013e",
+          "Name": "parameterName",
+          "Description": "The name of the parameter to set.\n\nstring",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f07e0bb94de341208d5a44a0e2bd4539",
+          "Name": "value",
+          "Description": "The value.\n\nvar",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "606fde90e36243348f4787661cf0dbad",
+          "Name": "Element",
+          "Description": "Element",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "Revit.Elements.Element.SetParameterByName@string,var",
+      "Replication": "Auto",
+      "Description": "Set one of the element's parameters.\n\nElement.SetParameterByName (parameterName: string, value: var): Element"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "31f2801215c242b099ec43cb8c305e70",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e46e383d9f7b417d9c11ff156fe4945b",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "EnergyPlus_Zone"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "11b3e3d6d58f4795a61901f208e8cc8f",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "985dc4fca7e54c2482cb507cc8dc398d",
+          "Name": "list",
+          "Description": "list of values\n\nvar[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "9797f851c0a04992afa4f8799d0c5610",
+          "Name": "sortFunction",
+          "Description": "function used to sort list\n\nFunction",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b6cafb490f72481780a46137f3c13a62",
+          "Name": "sortedList",
+          "Description": "type: var[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "List.SortByFunction@var[]..[],Function",
+      "Replication": "Auto",
+      "Description": "Use a function to determine how list items should be sorted.\n\nList.SortByFunction (list: var[]..[], sortFunction: Function): var[]..[]"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
+      "Id": "2f643f64f01f463db097a16e4bb5c0a3",
+      "NodeType": "FunctionNode",
+      "Inputs": [
+        {
+          "Id": "19111210f2f44990b36ad5f5aa823d62",
+          "Name": "element",
+          "Description": "Revit.Elements.Element",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4257962d5a224e728db4f7db44f2429c",
+          "Name": "parameterName",
+          "Description": "The name of the parameter whose value you want to obtain.\n\nstring",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "bf83a9db370d4a1e9d9a741984976b4b",
+          "Name": "var[]..[]",
+          "Description": "var[]..[]",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "FunctionSignature": "Revit.Elements.Element.GetParameterValueByName@string",
+      "Replication": "Auto",
+      "Description": "Get the value of one of the element's parameters.\n\nElement.GetParameterValueByName (parameterName: string): var[]..[]"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.WallTypes, DSRevitNodesUI",
+      "SelectedIndex": 43,
+      "SelectedString": "Muro Prueba Dynamo",
+      "Id": "912032d55d8645a0bc6b007a8a33d1fe",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "d94146476b724de7b62454c317b2db49",
+          "Name": "Wall Type",
+          "Description": "The selected Wall Type",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All wall types available in the document."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "588e52fc1c614b6f81086870c0b8d2b7",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "8e7d54d11e294513bc8c088ac73ed670",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "Type Mark"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "f3664e7573d0463294c56173ef2762c8",
+      "End": "2a401ce455404c58966a9f1a33c9cb97",
+      "Id": "377fac6a4213418eba4544b01567f4a4",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e3fdd94b674342b4b254c2f12b02d2a0",
+      "End": "b11c8866eac747868b911a79e1e5616a",
+      "Id": "ce421bc8a4ec4d7cae57ac0d415b295b",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "8ebf7b2a27fd404ba8a770fbd2d6b793",
+      "End": "2ae4f0f15e5745ada108f5ad7f3c89d0",
+      "Id": "84b96109e55242bd90efb3e82d41b950",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "5be44fd2df9f458b8f4666fb4622d1b6",
+      "End": "d60ff5e9b1a1411aa3d55fdd1abcae70",
+      "Id": "acb732ce6f164fdcafcc86fbd2221353",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3431e1fc689840bc80289a8690f8d19d",
+      "End": "f07e0bb94de341208d5a44a0e2bd4539",
+      "Id": "0e2998f023ec46179490cde2904dfa6b",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "7e71d30b4cc84d0caa43db1eabd94f98",
+      "End": "ad40798bf7a146f18f8d90df811a1695",
+      "Id": "25bd4a2f4301457ca4d069f86ba94198",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e46e383d9f7b417d9c11ff156fe4945b",
+      "End": "57ce2034db674cb884f6caed215f013e",
+      "Id": "725fd2a739b64a949b3fb2ba207dad44",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "b6cafb490f72481780a46137f3c13a62",
+      "End": "b2626ab9584940d599b50ab4531c3a98",
+      "Id": "8b9fd84a13d24e0abfcc9e881c09bde9",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "bf83a9db370d4a1e9d9a741984976b4b",
+      "End": "9797f851c0a04992afa4f8799d0c5610",
+      "Id": "b7d8306e97794a36b8c7c51ae25414da",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "d94146476b724de7b62454c317b2db49",
+      "End": "985dc4fca7e54c2482cb507cc8dc398d",
+      "Id": "b385f8802313473495582907f4ddebb1",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "8e7d54d11e294513bc8c088ac73ed670",
+      "End": "4257962d5a224e728db4f7db44f2429c",
+      "Id": "2392ac95a6ae4a4481a75d3e75ca5ae9",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.19",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.1",
+      "Data": {}
+    }
+  ],
+  "Author": "",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.19.3.6394",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "4c6df543f00d4deaafdcc28aaf3da96c",
+        "Name": "Data.ImportExcel",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1636.857713541873,
+        "Y": 2727.54035764705
+      },
+      {
+        "Id": "3c251b49eeb14152ba07cdfbd4bc006b",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1046.0824150633161,
+        "Y": 2571.8289977496115
+      },
+      {
+        "Id": "2c22a0cbd8f74371b3624d9f3321ab89",
+        "Name": "String",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1404.8337153829932,
+        "Y": 2760.0993119415402
+      },
+      {
+        "Id": "094f747762c94af3ba0c7dbfe3ffc919",
+        "Name": "File From Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1408.394763812053,
+        "Y": 2577.1374957519456
+      },
+      {
+        "Id": "7dba4bee9b104a828bc07a5d325f9a0f",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": true,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 2239.9456840104822,
+        "Y": 2719.9342674788181
+      },
+      {
+        "Id": "79510df5236e4ae590c1077c78710a37",
+        "Name": "Wall Types",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1913.9726776122377,
+        "Y": 2861.2513941011043
+      },
+      {
+        "Id": "907cbe548c3141b48a5b223d486db081",
+        "Name": "Element.SetParameterByName",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 2540.8677589971749,
+        "Y": 2322.5963875454067
+      },
+      {
+        "Id": "31f2801215c242b099ec43cb8c305e70",
+        "Name": "String",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 2192.968891207739,
+        "Y": 2356.8591060211957
+      },
+      {
+        "Id": "11b3e3d6d58f4795a61901f208e8cc8f",
+        "Name": "List.SortByFunction",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 2148.67986069241,
+        "Y": 2031.3854577448678
+      },
+      {
+        "Id": "2f643f64f01f463db097a16e4bb5c0a3",
+        "Name": "Element.GetParameterValueByName",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1774.7824065607911,
+        "Y": 2148.3496857887949
+      },
+      {
+        "Id": "912032d55d8645a0bc6b007a8a33d1fe",
+        "Name": "Wall Types",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1829.0950466213424,
+        "Y": 1944.4549686987393
+      },
+      {
+        "Id": "588e52fc1c614b6f81086870c0b8d2b7",
+        "Name": "String",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 1585.7101368013234,
+        "Y": 2062.346178774877
+      }
+    ],
+    "Annotations": [],
+    "X": -191.81165713337157,
+    "Y": -227.14387135002062,
+    "Zoom": 0.26964770299477608
+  }
+}
