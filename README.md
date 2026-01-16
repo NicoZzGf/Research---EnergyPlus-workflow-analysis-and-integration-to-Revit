@@ -1,0 +1,2 @@
+# Research---EnergyPlus-workflow-analysis-and-integration-to-Revit
+This repository contains my workflow for the research project "Parametric optimization of the envelope for thermal comfort and embodied carbon performance...". It includes Python code for running parametric simulations in EnergyPlus, code for data analysis, and the workflow for integrating the results into a BIM environment using Dynamo.
